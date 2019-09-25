@@ -1,0 +1,252 @@
+\documentclass{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{titlesec}
+\usepackage{ifthen}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{systeme}
+
+% -------- %
+% SECTIONS %
+% -------- %
+\newcounter{problemnumber}\setcounter{problemnumber}{1}
+\titlespacing\section{0pt}{10pt}{0pt}   % Spacing between Problems
+\titlespacing\subsection{0pt}{5pt}{0pt} % Spacing between Parts
+\newcommand{\problem}[1][-1]{
+\setcounter{partnumber}{1}
+\ifnum#1>0
+\setcounter{problemnumber}{#1}
+\fi
+\section*{Problem \arabic{problemnumber}}
+\stepcounter{problemnumber}
+}
+
+\newcounter{partnumber}\setcounter{partnumber}{1}
+\newcommand{\ppart}[1][-1]{
+\ifnum#1>0
+\setcounter{partnumber}{#1}
+\fi
+\subsection*{Part \parttype{partnumber}}
+\stepcounter{partnumber}
+}
+
+\newenvironment{question}{
+%\color{gray}
+\itshape
+\vspace{5pt}
+\begin{tabular}{|p{0.97\linewidth}}\end{tabular}\\[5pt]
+}
+
+
+% ------------- %
+% HEADER/FOOTER %
+% ------------- %
+\setlength\parindent{0pt}
+\setlength\headheight{30pt}
+\headsep=0.25in
+\pagestyle{fancy}
+\lhead{\ifthenelse{\thepage=1}
+{\textbf{Mikolaj Malkinski} \\ m.malkinski87@gmail.com}
+{}
+}
+\chead{\ifthenelse{\thepage=1}
+{\textbf{\huge{HOMEWORK \hwnumber}}}
+{\textbf{\large{HOMEWORK \hwnumber}}}
+}
+\rhead{\ifthenelse{\thepage=1}
+{\textbf{{\course}} \\ \textbf{\today}}
+{}
+}
+\cfoot{\thepage}
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+
+
+% ---------- %
+% PARAMETERS %
+% ---------- %
+% \PARTTYPE:
+% \Alph   := "Part A, Part B,  ..."
+% \alph   := "Part a, Part b,  ..."
+% \arabic := "Part 1, Part 2,  ..."
+% \Roman  := "Part I, Part II, ..."
+\newcommand\parttype{\Roman}
+
+% \COURSE:
+\newcommand\course{KBLMM}
+
+% \HWNUMBER
+\newcommand\hwnumber{1}
+
+%  ------- %
+% DOCUMENT %
+% -------- %
+\begin{document}
+
+    \problem[1]
+    \part{}
+    \begin{question}
+        Consider the real two-dimensional space $\mathbb{R}^2$;
+        in this space planes correspond to lines.
+        Find the point \textbf{p} on a given plane $\pi$ that is closest to the origin;
+        in other words, derive the formula
+        \[
+            d(0, \pi) = \frac{|b|}{||w||}
+        \]
+        where $\pi: \langle w, x \rangle + b = 0$ or $w_2 x_2 + w_1 x_1 + b = 0$.
+    \end{question}
+
+    \bigskip
+
+    Denote by $d(X, Y)$ the distance between points $X$ and $Y$.
+    In general, the distance $d(X, Y)$ between two points $X = (x_1, \dots, x_n)$ and $Y = (y_1, \dots, y_n)$ in $\mathbb{R}^n$ is equal to $\sqrt{\sum_{i=1}^n (x_i - y_i)^2}$.
+    Hence, the distance $d(P, Q)$, where $P, Q \in \mathbb{R}^2$, is equal to $\sqrt{\sum_{i=1}^{2} (p_i - q_i)^2}$.
+
+    Let $P = (x, y)$ and $Q = (0, 0)$.
+    Then, $d(P, Q) = \sqrt{x^{2} + y^{2}}$.
+    Consider following system of equations:
+    \begin{align*}
+        w_1 x + w_2 y + b &= 0 \\
+        d(0, \pi) &= \sqrt{x^2 + y^2}
+    \end{align*}
+
+    Firstly, define the Lagrangian:
+    \[
+        \alpha(x, y, \beta) = \sqrt{x^2 + y^2} + \beta (w_1 x + w_2 y + b)
+    \]
+    Then, solve it:
+    \[
+        \systeme*[][:]{
+        \frac{\partial \alpha}{\partial x} = \frac{x}{\sqrt{x^2 + y^2}} + \beta w_1 = 0:
+        \frac{\partial \alpha}{\partial y} = \frac{y}{\sqrt{x^2 + y^2}} + \beta w_2 = 0:
+        \frac{\partial \alpha}{\partial \beta} = w_1 x + w_2 y + b = 0
+        }
+    \]
+    \begin{equation*}
+        \systeme{
+        x = -\beta w_1 * \sqrt{x^2 + y^2},
+        y = -\beta w_2 * \sqrt{x^2 + y^2},
+        0 = w_1 x + w_2 y + b
+        }
+    \end{equation*}
+
+    \begin{align*}
+        -\beta w_1 w_1 \sqrt{x^2 + y^2} -\beta w_2 w_2 \sqrt{x^2 + y^2} + b = 0 \\
+        - \beta \sqrt{x^2 + y^2} (w_1^2 + w_2^2) + b = 0 \\
+        \beta \sqrt{x^2 + y^2} (w_1^2 + w_2^2) = b \\
+        \sqrt{x^2 + y^2} = \frac{b}{w_1^2 + w_2^2} * \frac{1}{\beta} \\
+        d(0, \pi) = \frac{b}{w_1^2 + w_2^2} * \frac{1}{\beta}
+    \end{align*}
+
+    \newpage
+
+    \part{}
+    \begin{question}
+        In $\mathbb{R}^d$, find the point \textbf{p} on a given plane $\pi$ that is closest to a point \textbf{q};
+        in other words, derive the formula
+        \[
+            d(q, \pi) = \frac{g(q)}{||w||}
+        \]
+        where $g(p) = \langle w, p \rangle + b$.
+        Note that the previous case corresponds to q = 0.
+    \end{question}
+
+    \bigskip
+
+    Let $P = (p_1, p_2)$ and $Q = (q_1, q_2)$.
+    Then, $d(P, Q) = \sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}$.
+    Consider following system of equations:
+    \begin{align*}
+        w_1 p_1 + w_2 p_2 + b &= 0 \\
+        d(P, Q) &= \sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}
+    \end{align*}
+
+    Firstly, define the Lagrangian:
+    \[
+        \alpha(x, y, \beta) = \sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}} + \beta (w_1 p_1 + w_2 p_2 + b)
+    \]
+    Then, solve it:
+    \[
+        \systeme*[][:]{
+        \frac{\partial \alpha}{\partial p_1} = \frac{p_1 - q_1}{\sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}} + \beta w_1 = 0:
+        \frac{\partial \alpha}{\partial p_2} = \frac{p_2 - q_2}{\sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}} + \beta w_2 = 0:
+        \frac{\partial \alpha}{\partial \beta} = w_1 p_1 + w_2 p_2 + b = 0
+        }
+    \]
+    \[
+        \systeme*[][:]{
+        p_1 = q_1 - \beta w_1 {\sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}}:
+        p_2 = q_2 - \beta w_2 {\sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}}:
+        0 = w_1 p_1 + w_2 p_2 + b
+        }
+    \]
+    \[
+        w_1 (q_1 - \beta w_1 {\sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}}) + w_2 (q_2 - \beta w_2 {\sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}}}) + b = 0 \\
+    \]
+    \[
+        w_1 q_1 + w_2 q_2 - \beta \sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}} w_1^2 w_2^2 + b = 0 \\
+    \]
+    \[
+        \beta \sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}} w_1^2 w_2^2 = b + w_1 q_1 + w_2 q_2 \\
+    \]
+    \[
+        \sqrt{(p_1 - q_1)^{2} + (p_2 - q_2)^{2}} = \frac{b + w_1 q_1 + w_2 q_2}{\beta w_1^2 w_2^2} \\
+    \]
+    \[
+        d(q, \pi) = \frac{b + w_1 q_1 + w_2 q_2}{\beta w_1^2 w_2^2}
+    \]
+
+	\newpage
+
+    \problem[3]
+    \begin{question}
+        Consider the circle formed by the intersection of the unit sphere with the plane $x + y + z = 0.5$.
+        Consider the three-dimensional optimization problem of finding the point on this circle that is closest to the point $(1, 2, 3)$.
+        Solve it using Lagrange multipliers.
+    \end{question}
+
+    \bigskip
+
+    Let $f(x, y, z) = (x + x_0)^2 + (y + y_0)^2 + (z + z_0)^2 = 1$ be an equation of a unit sphere centered in $(x_0, y_0, z_0)$.
+    For simplicity assume that the sphere is centered in the origin, that is $(x_0, y_0, z_0) = (0, 0, 0)$.
+    So, $f(x, y, z) = x^2 + y^2 + z^2 = 1$.
+    Let $\pi(x, y, z) = x + y + z = 0.5$ be an equation of a plane.
+    Let $P = (1, 2, 3)$.
+    The distance $d(Q, P)$, where $Q, P \in \mathbb{R}^3$, is equal to $\sqrt{\sum_{i=1}^{3} (q_i - p_i)^2}$.
+
+    \medskip
+
+    The task is to find a point $Q = (x, y, z)$ such that $d(Q, P) = d((x, y, z), (1, 2, 3)) = d(x, y, z)$ is minimal.
+    Consider following system of equations:
+
+    \[
+        \systeme*[][:]{
+        x^2 + y^2 + z^2 = 1:
+        x + y + z = 0.5:
+        d(x, y, z) = \sqrt{(x - 1)^2 + (y - 2) ^ 2 + (z - 3) ^ 2}
+        }
+    \]
+
+    Firstly, define the Lagrangian $\alpha$:
+    \begin{align*}
+        \alpha(x, y, z, \beta, \gamma) &= d(x, y, z) + \beta * (x^2 + y^2 + z^2 - 1) + \gamma * (x + y + z - 0.5) \\
+        \alpha(x, y, z, \beta, \gamma) &= \sqrt{(x - 1)^2 + (y - 2) ^ 2 + (z - 3) ^ 2} + \beta * (x^2 + y^2 + z^2 - 1) + \gamma * (x + y + z - 0.5)
+    \end{align*}
+
+    Then, solve it:
+    \[
+        \systeme*[][:]{
+        \frac{\partial \alpha}{\partial x} = \frac{(x - 1) ^ 2}{\sqrt{(x - 1)^2 + (y - 2) ^ 2 + (z - 3) ^ 2}} + 2 \beta x + \gamma = 0:
+        \frac{\partial \alpha}{\partial y} = \frac{(y - 2) ^ 2}{\sqrt{(x - 1)^2 + (y - 2) ^ 2 + (z - 3) ^ 2}} + 2 \beta y + \gamma = 0:
+        \frac{\partial \alpha}{\partial z} = \frac{(z - 3) ^ 2}{\sqrt{(x - 1)^2 + (y - 2) ^ 2 + (z - 3) ^ 2}} + 2 \beta z + \gamma = 0:
+        \frac{\partial \alpha}{\partial \beta} = x^2 + y^2 + z^2 - 1 = 0:
+        \frac{\partial \alpha}{\partial \gamma} = x + y + z - 0.5 = 0
+        }
+    \]
+
+    \bigskip
+    \centerline{\vdots}
+
+\end{document}
