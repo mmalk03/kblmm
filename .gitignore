@@ -1,2 +1,7 @@
 build/
 .idea/
+
+.RData
+.Rhistory
+report_cache/
+report_files/
