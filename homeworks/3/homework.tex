@@ -1,0 +1,155 @@
+\documentclass{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{titlesec}
+\usepackage{ifthen}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{systeme}
+\usepackage{amsfonts}
+
+% -------- %
+% SECTIONS %
+% -------- %
+\newcounter{problemnumber}\setcounter{problemnumber}{1}
+\titlespacing\section{0pt}{10pt}{0pt}   % Spacing between Problems
+\titlespacing\subsection{0pt}{5pt}{0pt} % Spacing between Parts
+\newcommand{\problem}[1][-1]{
+\setcounter{partnumber}{1}
+\ifnum#1>0
+\setcounter{problemnumber}{#1}
+\fi
+\section*{Problem \arabic{problemnumber} - The RBF kernel}
+\stepcounter{problemnumber}
+}
+
+\newcounter{partnumber}\setcounter{partnumber}{1}
+\newcommand{\ppart}[1][-1]{
+\ifnum#1>0
+\setcounter{partnumber}{#1}
+\fi
+\subsection*{Part \parttype{partnumber}}
+\stepcounter{partnumber}
+}
+
+\newenvironment{question}{
+%\color{gray}
+\itshape
+\vspace{5pt}
+\begin{tabular}{|p{0.97\linewidth}}\end{tabular}\\[5pt]
+}
+
+
+% ------------- %
+% HEADER/FOOTER %
+% ------------- %
+\setlength\parindent{0pt}
+\setlength\headheight{30pt}
+\headsep=0.25in
+\pagestyle{fancy}
+\lhead{\ifthenelse{\thepage=1}
+{\textbf{Mikolaj Malkinski} \\ m.malkinski87@gmail.com}
+{}
+}
+\chead{\ifthenelse{\thepage=1}
+{\textbf{\huge{HOMEWORK \hwnumber}}}
+{\textbf{\large{HOMEWORK \hwnumber}}}
+}
+\rhead{\ifthenelse{\thepage=1}
+{\textbf{{\course}} \\ \textbf{\today}}
+{}
+}
+\cfoot{\thepage}
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+
+
+% ---------- %
+% PARAMETERS %
+% ---------- %
+% \PARTTYPE:
+% \Alph   := "Part A, Part B,  ..."
+% \alph   := "Part a, Part b,  ..."
+% \arabic := "Part 1, Part 2,  ..."
+% \Roman  := "Part I, Part II, ..."
+\newcommand\parttype{\Roman}
+
+% \COURSE:
+\newcommand\course{KBLMM}
+
+% \HWNUMBER
+\newcommand\hwnumber{3}
+
+\newtheorem{theorem}{Theorem}
+
+%  ------- %
+% DOCUMENT %
+% -------- %
+\begin{document}
+
+    \problem[10]
+    \begin{question}
+
+        Consider the function:
+        \[
+            k(x, x') = exp(-\frac{||x - x'||^2}{2\sigma^2}), x, x' \in \matbbb{R}^d
+        \]
+        popularly known as the RBF kernel. Prove that it is a valid kernel.
+        Hint: expand the square and express the kernel as the product of three terms.
+
+    \end{question}
+
+    \bigskip
+    \bigskip
+    \bigskip
+
+    \begin{theorem}
+        If $k$ is a kernel, then $\gamma k(x, x')$ is also a kernel, for any $\gamma > 0$. (Problem 4)
+    \end{theorem}
+
+    \begin{theorem}
+        If $k$ is a kernel, then $exp(k(x, x'))$ is also a kernel. (Problem 9)
+    \end{theorem}
+
+    \begin{theorem}
+        Let $f: \mathbb{X} \rightarrow \mathbb{R}$.
+        If $k$ is a kernel, then $g(x, x') = f(x) k(x, x') f(x')$ is also a kernel.
+    \end{theorem}
+
+    \begin{gather}
+        k(x, x') =
+        exp(-\frac{||x - x'||^2}{2\sigma^2}) = \\
+        exp(-\frac{||x||^2 - 2||x||||x'|| + ||x'||^2}{2\sigma^2}) = \\
+        exp(-\frac{||x||^2}{2\sigma^2} + \frac{||x||||x'||}{\sigma^2} - \frac{||x'||^2}{2\sigma^2}) = \\
+        exp(-\frac{1}{2\sigma^2}||x||^2) exp(\frac{1}{\sigma^2}||x||||x'||) exp(-\frac{1}{2\sigma^2}||x'||^2)
+    \end{gather}
+
+    \bigskip
+
+    Let $f(x) = exp(-\frac{1}{2\sigma^2}||x||^2)$.
+    Then:
+    \begin{gather}
+        k(x, x') = f(x) exp(\frac{1}{\sigma^2}||x||||x'||) f(x') = f(x) k'(x, x') f(x)
+    \end{gather}
+
+    \bigskip
+
+    By \textit{Theorem 3}, it's only necessary to prove that $k'(x, x') = exp(\frac{1}{\sigma^2}||x||||x'||)$ is a kernel.
+    Start from a linear kernel (polynomial kernel with degree 1):
+    \begin{gather}
+        k_0(x, x') = xx'
+    \end{gather}
+
+    Consider following kernel:
+    \begin{gather}
+        k_1(x, x') = \frac{1}{\sigma^2} xx' = \frac{1}{\sigma^2} k_0(x, x') = \gamma k_0(x, x')
+    \end{gather}
+    By \textit{Theorem 1}, $k_1$ is a kernel for $\gamma = \frac{1}{\sigma^2} > 0$.
+    Now, construct $k_2$:
+    \begin{gather}
+        k_2(x, x') = exp(\frac{1}{\sigma^2} xx') = exp(k_1(x, x'))
+    \end{gather}
+    By \textit{Theorem 2}, $k_2$ is a kernel.
+
+\end{document}
