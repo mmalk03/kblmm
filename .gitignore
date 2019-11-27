@@ -6,3 +6,13 @@ out/
 .Rhistory
 report_cache/
 report_files/
+
+project/data
+
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.toc
