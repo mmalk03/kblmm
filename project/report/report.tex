@@ -26,6 +26,8 @@
 
 \usepackage{lipsum} % Required to insert dummy text. To be removed otherwise
 
+\usepackage{subcaption} % Display multiple figures side by side
+
 %----------------------------------------------------------------------------------------
 %	COLUMNS
 %----------------------------------------------------------------------------------------
@@ -114,6 +116,29 @@ Additionally, it will tackle the main challenge of predicting assessment scores 
 
 \section{Dataset}
 
+\begin{figure*} % Using \begin{figure*} makes the figure take up the entire width of the page
+    \centering
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/event-type-count.png}
+        \caption{Count of events with given type.}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/event-type-count.png}
+        \caption{TODO}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/event-type-count.png}
+        \caption{TODO}
+    \end{subfigure}
+    \caption{General information about dataset.}
+    \label{fig:general-info}
+\end{figure*}
+
 The dataset contains information about game analytics gathered by the \textit{PBS KIDS Measure Up!} application.
 It places players into a fictional world where they can participate in different activities, games, video clips or assessments.
 Each assessment is created with the goal of testing player's comprehension of a certain group of measurement-related skills.
@@ -134,7 +159,55 @@ Furthermore, the outcomes of assessments are grouped into 4 categories: solved o
 
 This section will describe metrics, models and techniques such as data transformations used to improve the results.
 All reported scores are computed on the testing set - the predictions of accuracy groups are submitted to the Kaggle platform which evaluates their correctness and returns obtained score.
-% TODO: describe used metric
+
+\subsection{Evaluation metric}
+
+To evaluate the submission, \textit{Quadratic Weighted Cohen's kappa coefficient} is used.
+The general Cohen's kappa coefficient is defined as:
+\begin{equation}
+    \kappa = \frac{p_o - p_e}{1 - p_e}
+    \label{eq:kappa}
+\end{equation}
+, where $p_o$ is the relative observed agreement among raters (accuracy) and $p_e$ is the hypothetical probability of chance agreement, using the observed data to calculate the probabilities of each observer randomly seeing each category.
+In other words, $\kappa$ is a more robust metric than accuracy which takes into account the possibility of correct solutions occurring by chance.
+
+The weighted $\kappa$ allows to weight disagreements differently - the score depends on the distance between predicted and actual class.
+Recall that the considered challenge is a 4-class classification problem.
+Table~\ref{tab:linear-kappa} presents weights used in a linear weighted $\kappa$.
+They can also be thought as \textit{disagreement scores} - the larger the weight the higher disagreement between predicted and actual class.
+To understand, consider the case when model predicts accuracy group 2 - the assessment was solved on the second attempt.
+Then, if the prediction is correct the disagreement score is equal to $0$, if assessment was solved on the first attempt (class 3) or after 3 or more attempts (class 1) the prediction is off only by $1$ class and the disagreement score is $0.33$ and finally if it was never solved it equals to $0.67$.
+
+\begin{table}
+    \caption{Coefficients of a linear weighted $\kappa$ for a 4-class classification problem.}
+    \centering
+    \begin{tabular}{c|cccc}
+        Class & 0 & 1 & 2 & 3 \\
+        \hline
+        0 & 0.00 & 0.33 & 0.67 & 1.00 \\
+        1 & 0.33 & 0.00 & 0.33 & 0.67 \\
+        2 & 0.67 & 0.33 & 0.00 & 0.33 \\
+        3 & 1.00 & 0.67 & 0.33 & 0.00 \\
+    \end{tabular}
+    \label{tab:linear-kappa}
+\end{table}
+
+The quadratic version allows to specify that the disagreement score depends not only on the difference between predicted classes but also on the order of the actual class.
+The details of weights used in this case are shown in the Table~\ref{tab:quadratic-kappa}.
+
+\begin{table}
+    \caption{Coefficients of a quadratic weighted $\kappa$ for a 4-class classification problem.}
+    \centering
+    \begin{tabular}{c|cccc}
+        Class & 0 & 1 & 2 & 3 \\
+        \hline
+        0 & 0.00 & 0.56 & 0.89 & 1.00 \\
+        1 & 0.56 & 0.00 & 0.56 & 0.89 \\
+        2 & 0.89 & 0.56 & 0.00 & 0.56 \\
+        3 & 1.00 & 0.89 & 0.56 & 0.00 \\
+    \end{tabular}
+    \label{tab:quadratic-kappa}
+\end{table}
 
 \subsection{Baseline model}
 
@@ -142,18 +215,18 @@ Firstly a naive model is created based on raw data to give a point of comparison
 As the Figure~\ref{fig:assessment-accuracy-by-type} shows, there is a clear difference between assessment completion rates depending on the problem type.
 The \textit{Chest Sorter} appears to be the hardest one having around 60\% of the attempts never solved, whereas \textit{Mushroom Sorter}, \textit{Cauldren Filler} and \textit{Cart Balancer} are usually solved after the first attempt.
 Based on this observation a baseline model is built which is based on the median of accuracy groups - for a given child and type of assessment to predict, a median of all previous assessments of this child with given type is taken and this gives the predicted accuracy group.
-This model achieved value of quadratic weighted kappa equal to $0.396$.
+This model achieved value of quadratic weighted $\kappa$ equal to $0.396$.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
-    \includegraphics[width=\linewidth]{images/assessment-accuracy-by-type.png}
-    \caption{Assessment accuracy by type used to build the baseline model.}
+    \includegraphics[width=\linewidth]{images/assessment-accuracy-group-count.png}
+    \caption{Accuracy groups presented for each assessment type - the main idea behind the baseline model.}
     \label{fig:assessment-accuracy-by-type}
 \end{figure}
 
 \subsection{Feature engineering}
 
-To potentially improve the performance of proposed models it may be beneficial to firstly introduce hand-crafted features based on domain knowledge.
+To potentially improve the performance of proposed models it may be beneficial to introduce hand-crafted features based on domain knowledge.
 For this purpose the dataset was extended with fundamental summary statistics for each user such as the number of events, total, median, average and standard deviation of time spent for each type.
 
 \subsection{Support Vector Machines}
@@ -164,35 +237,24 @@ For this purpose the dataset was extended with fundamental summary statistics fo
 
 \section{Discussion}
 
-\begin{figure*}[ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
-\includegraphics[width=\linewidth]{images/view}
-\caption{Wide Picture}
-\label{fig:view}
-\end{figure*}
-
 \lipsum[4] % Dummy text
-
-\begin{equation}
-\cos^3 \theta =\frac{1}{4}\cos\theta+\frac{3}{4}\cos 3\theta
-\label{eq:refname2}
-\end{equation}
 
 \paragraph{Paragraph} \lipsum[7] % Dummy text
 
-\begin{table}[hbt]
-\caption{Table of Grades}
-\centering
-\begin{tabular}{llr}
-\toprule
-\multicolumn{2}{c}{Name} \\
-\cmidrule(r){1-2}
-First name & Last Name & Grade \\
-\midrule
-John & Doe & $7.5$ \\
-Richard & Miles & $2$ \\
-\bottomrule
-\end{tabular}
-\label{tab:label}
+\begin{table}
+    \caption{Table of Grades}
+    \centering
+    \begin{tabular}{llr}
+        \toprule
+        \multicolumn{2}{c}{Name} \\
+        \cmidrule(r){1-2}
+        First name & Last Name & Grade \\
+        \midrule
+        John & Doe & $7.5$ \\
+        Richard & Miles & $2$ \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:label}
 \end{table}
 
 %------------------------------------------------
