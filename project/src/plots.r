@@ -1,3 +1,6 @@
+library(ggplot2)
+library(RColorBrewer)
+
 configure_plot_theme <- function() {
     theme_set(
         theme_minimal() + theme(
@@ -11,7 +14,6 @@ configure_plot_theme <- function() {
 
 colors <- brewer.pal(6, 'YlGnBu')
 
-# Number of events by type
 events_by_type_plot <- function(train) {
     train %>% 
         count(type) %>%
