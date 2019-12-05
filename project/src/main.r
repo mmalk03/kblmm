@@ -50,6 +50,7 @@ train <- train %>%
 
 configure_plot_theme()
 events_by_type_plot(train)
+activity_time_plot(train)
 accuracy_groups_plot(train_labels)
 
 ### Baseline model
