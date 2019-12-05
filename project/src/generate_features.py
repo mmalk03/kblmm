@@ -145,7 +145,7 @@ train_df = pd.DataFrame(compiled_train)
 test_df = pd.DataFrame(compiled_test)
 
 features = train_df.loc[(train_df.sum(axis=1) != 0), (train_df.sum(axis=0) != 0)].columns
-features = [x for x in features if x not in ['accuracy_group', 'installation_id']]
+# features = [x for x in features if x not in ['accuracy_group', 'installation_id']]
 
 train_df[features].to_csv('project/input/data-science-bowl-2019/summarised_train.csv', index=False)
 test_df[features].to_csv('project/input/data-science-bowl-2019/summarised_test.csv', index=False)

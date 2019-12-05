@@ -256,7 +256,7 @@ Other good variables are the accumulated accuracy and accuracy group for given p
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth,height=6cm]{images/xgboost_cv.png}
-    \caption{Value of mean quadratic weighted $\kappa$ with standard deviation averaged across 5 cross-validation folds.}
+    \caption{Value of mean quadratic weighted $\kappa$ with standard deviation averaged across 5 cross-validation folds for XGBoost.}
     \label{fig:xgboost-cv}
 \end{figure}
 
@@ -265,33 +265,69 @@ Figure~\ref{fig:xgboost-cv} shows the value of quadratic weighted $\kappa$ for t
 The results are averaged across 5 folds of cross-validation and \textit{early stopping} is used to stop the training if the metric doesn't improve on the testing set for more than 5 iterations.
 It's clearly visible that the model overfits to the training data.
 In order to improve the model performance and reduce overfitting, hyperparameter tuning is performed.
+The complexity of an XGBoost model can be controlled by manipulating following parameters: \textit{max\_depth} controls the depth of generated trees - smaller trees have smaller predictive power but are less complex and have higher chance of generalising to the test set, bigger trees will more likely overfit to the train data; \textit{min\_child\_weight} which determines when to partition a leaf in the tree; \textit{subsample} which is the factor of training set to subsample for growing trees in each iteration; \textit{colsample\_bytree} determines the subsample ratio of features taken into consideration when building a new tree.
+
+For each presented parameter a list of possible values was defined.
+Then a method called \textit{random search} was performed which randomly sampled a value for each parameter and evaluated the model using 5-fold cross validation.
+The best performing model achieved weighted quadratic $\kappa$ of $0.5411$ (averaged across 5 cross validation folds) and $TODO$ on the testing set evaluated by the Kaggle platform.
 
 \subsection{Support Vector Machines}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth,height=6cm]{images/svm-optimisation-1.png}
+    \caption{Heatmap showing 50 values of quadratic weighted $\kappa$ depending on randomly sampled parameters $C \in (2^{-5}, 2^5)$ and $\sigma \in (2^{-5}, 2^5)$ for SVM with rbfdot kernel, calculated on a heldout validation set.}
+    \label{fig:svm-optimisation-1}
+\end{figure}
+
+Support Vector Machines (SVM) is another well performing model for classification tasks.
+In presented experiments, the \textit{Radial Basis Function (RBF)} will be used as the kernel.
+To achieve reasonable performance from an SVM it's necessary to carefully choose its parameters.
+This work will analyse the influence of 2 parameters: $C$ - a regularisation parameter of the SVM, which is able to balance the trade-off between the amount of correctly classified observations from the training data and the margin of decision function;
+$\sigma$ TODO.
+
+For this purpose again the random search is applied.
+Firstly, for a fixed kernel, different randomly sampled configurations of SVM's parameters $C \in (2^{-5}, 2^5)$ and $\sigma \in (2^{-5}, 2^5)$ are evaluated.
+Figure~\ref{fig:svm-optimisation-1} presents a heatmap with values of quadratic weighted $\kappa$ depending on 50 randomly selected values of hyperparemeters.
+The training time of an SVM, even with reduced number of features, is significantly larger compared to XGBoost.
+Therefore for these experiments, cross validation was replaced with a heldout validation set, obtained by removing part of the training set.
+Unfortunately, among all these configurations the highest performing one was able to achieve $\kappa = 0.1173$.
+It's visible that higher values of $\kappa$ were achieved for lower values of $\sigma$, where it seems that $C$ doesn't make a big difference.
+The random search procedure was repeated 2 more times with the same bounds for $C$, decreased bounds for $\sigma$ and 25 sampled configuraions in both cases.
+Restricting $\sigma \in (2^{-8}, 2^3)$ allowed to find a solution with $\kappa = 0.2975$, whereas $\sigma \in (0, 1)$ allowed to find a solution with $\kappa = 0.3588$.
+TODO: compare with baseline
 
 %------------------------------------------------
 
 \section{Discussion}
 
-\lipsum[4] % Dummy text
-
-\paragraph{Paragraph} \lipsum[7] % Dummy text
-
 \begin{table}
-    \caption{Table of Grades}
+    \caption{Average quadratic weighted $\kappa$ computed by 5-fold cross validation on the training set.}
     \centering
-    \begin{tabular}{llr}
-        \toprule
-        \multicolumn{2}{c}{Name} \\
-        \cmidrule(r){1-2}
-        First name & Last Name & Grade \\
-        \midrule
-        John & Doe & $7.5$ \\
-        Richard & Miles & $2$ \\
-        \bottomrule
+    \begin{tabular}{c|c}
+        Model & $\kappa$ \\
+        \hline
+        SVM & 0.396 \\
+        XGBoost & 0.396 \\
+        Baseline & 0.396 \\
     \end{tabular}
-    \label{tab:label}
+    \label{tab:model-results}
 \end{table}
+
+This work focused on analysing the possibilities of supporting childhood education with technology, by predicting childs performance in measurement based assessments.
+Analysis and visualisation of the Data Science Bowl 2019 dataset give interesting insights into the way children interact with modern technological devices.
+However, such a dataset requires in-depth knowledge about the considered domain in order to prepare hand-crafted features which can then be used by a learning model.
+Most likely the features created in this work can still be improved by experts which could further boost the performance of evaluated models.
+Moreover, to gain more insights into the problem, a wider selection of models should be evaluated on this dataset, starting from simple ones like logistic regression.
+Further research should be conducted which could compare their performance to the heavy artillery used in this work - XGBoost and SVM.
+
+Then, the performance of 2 state-of-the-art models was compared with a simple baseline.
+XGBoost even with default parameter setting is able to achieve a significantly higher performance than constructed baseline.
+On the other hand, SVMs achieved worse performance while requiring careful parameter tuning, processing time and computing resources.
+The final achieved results are summarised in the Table~\ref{tab:model-results}.
+However, it's important to remember that the SVM was trained only on 50 selected features from the dataset, which were chosen as the most crucial by XGBoost.
+It might turn out that other variables are more important for good performance of SVM, which were not included in this set.
+Nonetheless, exploring this possibility would require a significantly larger computing possibilities even to train the model with default parameters, but then what about cross-validation and hyperparameter tuning?
 
 %------------------------------------------------
 \phantomsection

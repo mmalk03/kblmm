@@ -73,6 +73,24 @@ best_parameters <- list(C = 4.35, sigma = 0.0569)
 svm_optimisation_plot(tuning_result)
 kappa_through_time(tuning_result)
 
+# Evaluation
+
+tuned_learner <- svm_classification_learner %>% setHyperPars(par.vals = tuning_result$x)
+parameters <- makeParamSet(
+    makeNumericParam('C', lower = 4.35, upper = 4.35),
+    makeNumericParam('sigma', lower = 0.0569, upper = 0.0569)
+)
+tuning_result <- tuneParams(
+    learner = tuned_learner,
+    task = train_task,
+    resampling = makeResampleDesc('CV', stratify = TRUE, iters = 5),
+    control = makeTuneControlRandom(maxit = 1),
+    measures = wkappa,
+    par.set = parameters,
+    show.info = TRUE
+)
+# [Tune] Result: C=4.35; sigma=0.0569 : wkappa.test.mean=0.3713058
+
 # Prediction of best model
 
 svm_classification_learner %>%
