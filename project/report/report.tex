@@ -116,49 +116,40 @@ Additionally, it will tackle the main challenge of predicting assessment scores 
 
 \section{Dataset}
 
-\begin{figure*} % Using \begin{figure*} makes the figure take up the entire width of the page
-    \centering
-    \begin{subfigure}[t]{0.31\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/event-type-count.png}
-        \caption{Count of events with given type.}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[t]{0.31\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/event-type-count.png}
-        \caption{TODO}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[t]{0.31\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/event-type-count.png}
-        \caption{TODO}
-    \end{subfigure}
-    \caption{General information about dataset.}
-    \label{fig:general-info}
-\end{figure*}
-
 The dataset contains information about game analytics gathered by the \textit{PBS KIDS Measure Up!} application.
 It places players into a fictional world where they can participate in different activities, games, video clips or assessments.
+The Figure~\ref{fig:event-type-counts} presents the popularity of each part of the gameplay.
 Each assessment is created with the goal of testing player's comprehension of a certain group of measurement-related skills.
 They are divided into following categories: \textit{Bird Measurer}, \textit{Cart Balancer}, \textit{Cauldron Filler}, \textit{Chest Sorter}, and \textit{Mushroom Sorter}.
 
 The goal of the competition is to predict the number of attempts a child will need to pass given assessment, based on the already gathered gameplay data.
-Note that each incorrect answer is counted as an attempt.
+Each incorrect answer is counted as an attempt.
 The dataset is divided into two parts: training and testing.
 The former one contains full history of gameplay data.
 On the other hand, the latter one is missing history after starts of randomly chosen assessments, for which the number of attempts has to be predicted.
 Furthermore, the outcomes of assessments are grouped into 4 categories: solved on the first attempt; solved on the second attempt; solved after 3 or more attempts; never solved.
+Figures~\ref{fig:event-type-counts} and~\ref{fig:activity-time} give further insights into the dataset.
 
-% TODO: give some insights into the dataset based on plots which can be put in the Appendix
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth,height=6cm]{images/event-type-count.png}
+    \caption{Count of events with given type. Most of the gameplay consists of games and activities, around 12.5\% is devoted to assessments whereas video clips are the rarest category.}
+    \label{fig:event-type-counts}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth,height=6cm]{images/activity_time.png}
+    \caption{Analysing the time spent on each gameplay category it's visible that most of the time is spent on games which are the most entertaining content in the application while least on assessments. Additionally there is a peak at the beginning which shows that some events are simply skipped by the user.}
+    \label{fig:activity-time}
+\end{figure}
 
 %------------------------------------------------
 
 \section{Methods}
 
 This section will describe metrics, models and techniques such as data transformations used to improve the results.
-All reported scores are computed on the testing set - the predictions of accuracy groups are submitted to the Kaggle platform which evaluates their correctness and returns obtained score.
+Final reported scores are computed on the testing set - the predictions of accuracy groups are submitted to the Kaggle platform which evaluates their correctness and returns obtained score.
 
 \subsection{Evaluation metric}
 
@@ -171,14 +162,7 @@ The general Cohen's kappa coefficient is defined as:
 , where $p_o$ is the relative observed agreement among raters (accuracy) and $p_e$ is the hypothetical probability of chance agreement, using the observed data to calculate the probabilities of each observer randomly seeing each category.
 In other words, $\kappa$ is a more robust metric than accuracy which takes into account the possibility of correct solutions occurring by chance.
 
-The weighted $\kappa$ allows to weight disagreements differently - the score depends on the distance between predicted and actual class.
-Recall that the considered challenge is a 4-class classification problem.
-Table~\ref{tab:linear-kappa} presents weights used in a linear weighted $\kappa$.
-They can also be thought as \textit{disagreement scores} - the larger the weight the higher disagreement between predicted and actual class.
-To understand, consider the case when model predicts accuracy group 2 - the assessment was solved on the second attempt.
-Then, if the prediction is correct the disagreement score is equal to $0$, if assessment was solved on the first attempt (class 3) or after 3 or more attempts (class 1) the prediction is off only by $1$ class and the disagreement score is $0.33$ and finally if it was never solved it equals to $0.67$.
-
-\begin{table}
+\begin{table}[!h]
     \caption{Coefficients of a linear weighted $\kappa$ for a 4-class classification problem.}
     \centering
     \begin{tabular}{c|cccc}
@@ -192,10 +176,7 @@ Then, if the prediction is correct the disagreement score is equal to $0$, if as
     \label{tab:linear-kappa}
 \end{table}
 
-The quadratic version allows to specify that the disagreement score depends not only on the difference between predicted classes but also on the order of the actual class.
-The details of weights used in this case are shown in the Table~\ref{tab:quadratic-kappa}.
-
-\begin{table}
+\begin{table}[!h]
     \caption{Coefficients of a quadratic weighted $\kappa$ for a 4-class classification problem.}
     \centering
     \begin{tabular}{c|cccc}
@@ -208,6 +189,16 @@ The details of weights used in this case are shown in the Table~\ref{tab:quadrat
     \end{tabular}
     \label{tab:quadratic-kappa}
 \end{table}
+
+The weighted $\kappa$ allows to weight disagreements differently - the score depends on the distance between predicted and actual class.
+Recall that the considered challenge is a 4-class classification problem.
+Table~\ref{tab:linear-kappa} presents weights used in a linear weighted $\kappa$.
+They can also be thought as \textit{disagreement scores} - the larger the weight the higher disagreement between predicted and actual class.
+To understand, consider the case when model predicts accuracy group 2 - the assessment was solved on the second attempt.
+Then, if the prediction is correct the disagreement score is equal to $0$, if assessment was solved on the first attempt (class 3) or after 3 or more attempts (class 1) the prediction is off only by $1$ class and the disagreement score is $0.33$ and finally if it was never solved it equals to $0.67$.
+
+The quadratic version allows to specify that the disagreement score depends not only on the difference between predicted classes but also on the order of the actual class.
+The details of weights used in this case are shown in the Table~\ref{tab:quadratic-kappa}.
 
 \subsection{Baseline model}
 
@@ -227,11 +218,56 @@ This model achieved value of quadratic weighted $\kappa$ equal to $0.396$.
 \subsection{Feature engineering}
 
 To potentially improve the performance of proposed models it may be beneficial to introduce hand-crafted features based on domain knowledge.
-For this purpose the dataset was extended with fundamental summary statistics for each user such as the number of events, total, median, average and standard deviation of time spent for each type.
+For this purpose the dataset was extended with fundamental summary statistics computed for each user.
+The set of generated features contains the count of each activity in which user engaged, their accumulated and mean scores in each assessment, the number of successful and unsuccessful attempts, total counts of each event which occured during users gameplay history and some additional ones like the total or average time spent on each activity.
+In total, the dataset was extended to more than 800 columns.
+Furthermore, the original data contained more than 1 million records.
+That is because each event which occurred during the gameplay was saved separately.
+After described summarisation the new training set contains less than 18 thousand rows.
+The same transformations were applied to the testing set.
+
+With such large number of columns it is expected that some, if not most, of them will turn out to be useless.
+In this case 2 approaches can be used: either one may try to analyse each feature separately by for example calculating its correlation with the response variable; or a feature selection method can be applied.
+Without this procedure some classification models may have troubles in distinguishing which features are important and include them in the final prediction even though they are just random noise not correlated with the predicted feature.
+What is more, the computation with such big dataset will take considerably more time than if the number of variables would be reduced.
+
+\subsection{Feature selection}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{images/feature_importance.png}
+    \caption{Feature ranking of XGBoost model with default parameters trained on the whole dataset for 10 most important variables.}
+    \label{fig:feature-importance}
+\end{figure}
+
+To combat the \textit{curse of dimensionality} and reduce the dataset size a feature selection method has to be applied.
+\paragraph{Iterative methods}
+The first possibility is to use simple iterative methods like \textit{forward selection} which starts with a model without any features and then in each iteration adds a new variable; \textit{backward elimination} which starts with all features and then removes the least significant variable in each iteration; \textit{recursive feature elimination} which constantly creates new models while remembering the best and worst performing features at each iteration.
+However, all described methods require a tremendous amount of iterations to find the best subset of predictors.
+\paragraph{Ranking models}
+Some of classification models are able to store additional information during training which tells about which feature was the most useful.
+In this way it's possible to train a single model, such as XGBoost~\cite{xgboost}, and rank the variables by their importance.
+Figure~\ref{fig:feature-importance} shows the 10 most important features selected by the XGBoost model from the whole set of more than 800 columns.
+It's visible that a clear winner is the title of the assessment for which the accuracy group is predicted.
+Other good variables are the accumulated accuracy and accuracy group for given player, as well as the average duration of the assessment - we can expect that users who solve a task in shorter time know the underlying reason standing behind the correct answer and don't require additional time for thinking.
+
+\subsection{XGBoost}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth,height=6cm]{images/xgboost_cv.png}
+    \caption{Value of mean quadratic weighted $\kappa$ with standard deviation averaged across 5 cross-validation folds.}
+    \label{fig:xgboost-cv}
+\end{figure}
+
+Firstly the performance of state-of-the-art XGBoost model is analysed.
+Figure~\ref{fig:xgboost-cv} shows the value of quadratic weighted $\kappa$ for the training and testing sets.
+The results are averaged across 5 folds of cross-validation and \textit{early stopping} is used to stop the training if the metric doesn't improve on the testing set for more than 5 iterations.
+It's clearly visible that the model overfits to the training data.
+In order to improve the model performance and reduce overfitting, hyperparameter tuning is performed.
 
 \subsection{Support Vector Machines}
 
-\subsection{Comparison with XGBoost}
 
 %------------------------------------------------
 
