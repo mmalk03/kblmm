@@ -70,8 +70,7 @@ parameters <- makeParamSet(
 stratified_cv_resampling <- makeResampleDesc('CV', stratify = TRUE, iters = 5)
 random_search_strategy <- makeTuneControlRandom(maxit = 10)
 
-# parallelStartSocket(cpus = detectCores())
-
+parallelStart(mode = 'multicore', cpus = 6, level = 'mlr.tuneParams')
 tuning_result <- tuneParams(
     learner = xgboost_classification_learner,
     task = train_task,
@@ -81,8 +80,11 @@ tuning_result <- tuneParams(
     control = random_search_strategy,
     show.info = TRUE
 )
-
+parallelStop()
 # [Tune] Result: max_depth=4; min_child_weight=4.51; subsample=0.975; colsample_bytree=0.728 : wkappa.test.mean=0.5411150
+best_parameters <- list(max_depth = 4, min_child_weight = 4.514432, subsample = 0.9749555, colsample_bytree = 0.7277757)
+
+# Prediction of best model
 
 tuned_learner <- setHyperPars(xgboost_classification_learner, par.vals = tuning_result$x)
 tuned_xgboost_model <- mlr::train(learner = tuned_learner, task = train_task)

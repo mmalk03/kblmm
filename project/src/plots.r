@@ -83,3 +83,36 @@ xgboost_training_plot <- function(evaluation_log) {
         scale_color_manual(values = c(colors[3], colors[6])) +
         theme(legend.position = 'bottom')
 }
+
+svm_optimisation_plot <- function(tuning_result) {
+    tuning_data <- generateHyperParsEffectData(tuning_result)
+    min_kappa <- min(tuning_data$data$wkappa.test.mean)
+    max_kappa <- max(tuning_data$data$wkappa.test.mean)
+    midpoint_kappa <- mean(c(min_kappa, max_kappa))
+    
+    plotHyperParsEffect(
+        tuning_data,
+        x = 'C',
+        y = 'sigma',
+        z = 'wkappa.test.mean',
+        plot.type = 'heatmap',
+        interpolate = 'regr.earth',
+        show.experiments = TRUE
+    ) +
+        scale_fill_gradient2(
+            breaks = seq(min_kappa, max_kappa, length.out = 5) %>% round(4),
+            low = colors[1],
+            mid = colors[3],
+            high = colors[6],
+            midpoint = midpoint_kappa
+        )
+}
+
+kappa_through_time <- function(tuning_result) {
+    plotHyperParsEffect(
+        generateHyperParsEffectData(tuning_result),
+        x = 'iteration',
+        y = 'wkappa.test.mean',
+        plot.type = 'line'
+    )
+}
