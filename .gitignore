@@ -17,3 +17,5 @@ project/kaggle/
 *.out
 *.synctex.gz
 *.toc
+
+*.zip
